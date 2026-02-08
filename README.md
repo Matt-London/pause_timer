@@ -25,3 +25,7 @@ Licensed under the GPL, check LICENSE file for more details.
 ## Attribution
 
 The structure of the views, scenes, app, and numpad keyboard were adapted from [this app](https://github.com/fidian/flipper-hid-app), so check them out for terrific USB and Bluetooth HID functionality from the Flipper!
+
+## Contribution
+
+Feel free to open any issues or make PRs with ideas that you have. I'd love to expand this to include more functionality!
