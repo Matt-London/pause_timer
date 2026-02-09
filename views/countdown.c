@@ -3,6 +3,7 @@
 #include <gui/elements.h>
 #include <furi.h>
 #include <furi_hal.h>
+#include <furi_hal_power.h>
 #include <infrared_transmit.h>
 #include <gui/scene_manager.h>
 
@@ -32,8 +33,17 @@ static void transmit_ir_signal(PauseTimerApp* app) {
         FURI_LOG_W(TAG, "No IR signal to transmit");
         return;
     }
-
     FURI_LOG_I(TAG, "Transmitting IR signal...");
+
+    // Detect external module and configure accordingly
+    FuriHalInfraredTxPin output_pin = furi_hal_infrared_detect_tx_output();
+    bool using_external = (output_pin == FuriHalInfraredTxPinExtPA7);
+
+    if (using_external) {
+        furi_hal_power_enable_otg();
+    }
+
+    furi_hal_infrared_set_tx_output(output_pin);
 
     // Figure out if it's raw or decoded and send it accordingly
     if(app->learned_ir_signal.is_decoded) {
@@ -43,6 +53,12 @@ static void transmit_ir_signal(PauseTimerApp* app) {
             app->learned_ir_signal.raw_timings, app->learned_ir_signal.raw_timings_size, true);
     }
     furi_delay_ms(100);
+
+    // Cleanup: Reset to internal and disable power if external
+    if (using_external) {
+        furi_hal_power_disable_otg();
+    }
+    furi_hal_infrared_set_tx_output(FuriHalInfraredTxPinInternal);
 }
 
 static void countdown_draw_callback(Canvas* canvas, void* context) {
